@@ -1,0 +1,33 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates
+    tags: always
+    ansible.builtin.package:
+      update_cache: yes
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache on web servers
+    tags: apache2, ubuntu
+    ansible.builtin.package:
+      name:
+      -  apache2
+      -  libapache2-mod-php
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+    - name: install mariadb package
+      tags: db, fedora
+      ansible.builtin.package:
+        name: mariadb
+        state: latest
+      when: ansible_distribution == "Fedora"
+
