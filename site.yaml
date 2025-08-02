@@ -8,6 +8,25 @@
     ansible.builtin.package:
       update_cache: yes
 
+  - name: create user
+    tags: always
+    ansible.builtin.user:
+      name: simone
+      groups: root
+
+  - name: add sudoers file for somine
+    ansible.builtin.copy:
+      src: sudoers_simone
+      dest: /etc/sudoers.d/simone
+      owner: root
+      group: root
+      mode: 0440
+
+  - name: add ssh key for simone
+    ansible.builtin.authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICC2YSs84cq+ZPhTGkKMi3MBql4QRGlqb+/MG4Fn+A7K Ansible_key"
+
 - hosts: web_servers
   become: true
   tasks:
@@ -19,6 +38,15 @@
       -  apache2
       -  libapache2-mod-php
     when: ansible_distribution == "Ubuntu"
+
+  - name: copy html file for site
+    tags: apache2, ubuntu
+    ansible.builtin.copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
 
 - hosts: db_servers
   become: true
